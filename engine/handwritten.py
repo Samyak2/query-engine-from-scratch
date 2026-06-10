@@ -13,7 +13,7 @@ def query2(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
     return result
 
-# select a, b from X where y > 0
+# select a, b + 1 from X where y > 0
 def query3(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = []
     for row in data:
