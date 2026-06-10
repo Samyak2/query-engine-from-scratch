@@ -11,6 +11,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pyarrow-stubs>=20.0.0.20251215",
     "pytest>=9.0.3",
     "ruff>=0.15.16",
 ]
