@@ -12,7 +12,6 @@ class Operator:
 
 class TableScan(Operator):
     def __init__(self, filename: str):
-        super().__init__()
         self._file = pq.ParquetFile(filename)
         self._iter = self._file.iter_batches(1)
 
@@ -28,7 +27,6 @@ class TableScan(Operator):
 
 class Projection(Operator):
     def __init__(self, child: Operator) -> None:
-        super().__init__()
         self._child = child
 
     def next(self) -> dict[str, Any] | None:

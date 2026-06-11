@@ -1,4 +1,3 @@
-from math import exp
 from typing import Any, TYPE_CHECKING
 
 from sqloxide import parse_sql
@@ -6,6 +5,7 @@ import pyarrow.parquet as pq
 
 if TYPE_CHECKING:
     from sqloxide import Expr
+
 
 def execute_expr(row: dict[str, Any], expr: "Expr"):
     if "Identifier" in expr:
@@ -22,6 +22,7 @@ def execute_expr(row: dict[str, Any], expr: "Expr"):
             return left + right
         raise Exception("unknown binary op: ", binary["op"])
     raise Exception("unknown expr: ", expr)
+
 
 class Operator:
     def next(self) -> dict[str, Any] | None:
@@ -48,7 +49,7 @@ class TableScan(Operator):
 
 
 class Projection(Operator):
-    def __init__(self, exprs: "list[Expr]", child: Operator) -> None:
+    def __init__(self, exprs: dict[str, "Expr"], child: Operator) -> None:
         super().__init__()
         self._child = child
         self._exprs = exprs
@@ -57,7 +58,10 @@ class Projection(Operator):
         maybe_row = self._child.next()
         if not maybe_row:
             return None
-        return {"a": maybe_row["a"], "b": maybe_row["b"] + 1}
+        output_row = {}
+        for alias, expr in self._exprs.items():
+            output_row[alias] = execute_expr(maybe_row, expr)
+        return output_row
 
 
 class Filter(Operator):
@@ -72,14 +76,17 @@ class Filter(Operator):
             if not maybe_row:
                 return None
 
-            if maybe_row["b"] > 900_000:
+            if execute_expr(maybe_row, self._expr):
                 return maybe_row
 
 
 def build_plan(sql: str):
     tree = parse_sql(sql, dialect="ansi")[0]["Query"]["body"]["Select"]
 
-    plan = Filter(tree["selection"], Projection(tree["projection"], TableScan("data/sample_1.parquet")))
+    plan = Filter(
+        tree["selection"],
+        Projection(tree["projection"], TableScan("data/sample_1.parquet")),
+    )
 
     num_rows = 0
     row = plan.next()
@@ -93,6 +100,8 @@ def build_plan(sql: str):
 if __name__ == "__main__":
     # build_plan("select a, b from X")
 
-    # build_plan("select a, b + 1 from X")
+    # build_plan("select a, b from X")
 
-    build_plan("select a, b + 1 from X where b > 9000000")
+    # build_plan("select a, b from X where b > 9000000")
+
+    build_plan("select sum(a) from X where b > 9000000")
