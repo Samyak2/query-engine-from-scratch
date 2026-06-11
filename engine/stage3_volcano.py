@@ -1,6 +1,8 @@
 from typing import Any
 import pyarrow.parquet as pq
 
+FILE_NAME = "data/sample_1.parquet"
+
 
 class Operator:
     def next(self) -> dict[str, Any] | None:
@@ -10,9 +12,10 @@ class Operator:
         raise NotImplementedError(f"close not implemented for {self}")
 
 
+# select * from users;
 class TableScan(Operator):
-    def __init__(self, filename: str):
-        self._file = pq.ParquetFile(filename)
+    def __init__(self):
+        self._file = pq.ParquetFile(FILE_NAME)
         self._iter = self._file.iter_batches(1)
 
     def next(self) -> dict[str, Any] | None:
@@ -25,6 +28,7 @@ class TableScan(Operator):
         self._file.close()
 
 
+# select name, age + 1 as age from users;
 class Projection(Operator):
     def __init__(self, child: Operator) -> None:
         self._child = child
@@ -33,10 +37,11 @@ class Projection(Operator):
         maybe_row = self._child.next()
         if not maybe_row:
             return None
-        return {"a": maybe_row["a"], "b": maybe_row["b"] + 1}
+        return {"name": maybe_row["name"], "age": maybe_row["age"] + 1}
+
 
 if __name__ == "__main__":
-    plan = Projection(TableScan("data/sample_1.parquet"))
+    plan = Projection(TableScan(FILE_NAME))
 
     row = plan.next()
     while row is not None:
