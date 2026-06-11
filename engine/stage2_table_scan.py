@@ -2,7 +2,7 @@ from typing import Any
 import pyarrow.parquet as pq
 
 
-def scan_table(filename: str) -> list[dict[str, Any]]:
+def scan_table_full(filename: str) -> list[dict[str, Any]]:
     data = pq.read_table(filename)
     return data.to_pylist()
 
@@ -11,7 +11,8 @@ def scan_table(filename: str) -> list[dict[str, Any]]:
 
 # what if we could read one row at a time?
 
-def scan_table_2(filename: str) -> list[dict[str, Any]]:
+
+def scan_table(filename: str) -> list[dict[str, Any]]:
     file = pq.ParquetFile(filename)
 
     results = []
@@ -27,7 +28,7 @@ class TableScan:
         self._iter = self._file.iter_batches(1)
 
     def next(self) -> dict[str, Any] | None:
-        maybe_rows = next(self._iter)
+        maybe_rows = next(self._iter, None)
         if not maybe_rows:
             return None
         return maybe_rows.to_pylist()[0]
