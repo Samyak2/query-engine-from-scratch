@@ -1,6 +1,8 @@
 from typing import Any
 import pyarrow.parquet as pq
 
+FILE_NAME = "data/sample_1.parquet"
+
 
 def scan_table_full(filename: str) -> list[dict[str, Any]]:
     data = pq.read_table(filename)
@@ -12,8 +14,8 @@ def scan_table_full(filename: str) -> list[dict[str, Any]]:
 # what if we could read one row at a time?
 
 
-def scan_table(filename: str) -> list[dict[str, Any]]:
-    file = pq.ParquetFile(filename)
+def scan_table() -> list[dict[str, Any]]:
+    file = pq.ParquetFile(FILE_NAME)
 
     results = []
     for batch in file.iter_batches(1):
@@ -23,8 +25,8 @@ def scan_table(filename: str) -> list[dict[str, Any]]:
 
 
 class TableScan:
-    def __init__(self, filename: str):
-        self._file = pq.ParquetFile(filename)
+    def __init__(self):
+        self._file = pq.ParquetFile(FILE_NAME)
         self._iter = self._file.iter_batches(1)
 
     def next(self) -> dict[str, Any] | None:
