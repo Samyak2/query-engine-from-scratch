@@ -1,4 +1,4 @@
-from engine.table_scan import scan_table_2
+from engine.stage2_table_scan import scan_table_2
 
 def test_sample_1():
     result = scan_table_2("data/sample_1.parquet")
