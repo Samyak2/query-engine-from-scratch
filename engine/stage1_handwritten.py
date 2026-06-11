@@ -1,32 +1,50 @@
 from typing import Any
+import pyarrow.parquet as pq
 
-# select * from X
-def query1(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+FILE_NAME = "data/sample_1.parquet"
+
+# result should be a list of dictionaries, e.g.:
+# [
+#     {"col1": "a", "col2": 1, "col3": True},
+#     {"col1": "b", "col2": 2, "col3": False},
+#     {"col1": "c", "col2": 3, "col3": True},
+# ]
+
+
+# select * from users
+def query1() -> list[dict[str, Any]]:
+    data = pq.read_table(FILE_NAME).to_pylist()
     return data
 
-# select a, b + 1 from X
-def query2(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+
+# select name, age + 1 as age from users
+def query2() -> list[dict[str, Any]]:
+    data = pq.read_table(FILE_NAME).to_pylist()
     result = []
     for row in data:
-        new_row = {"a": row["a"], "b": row["b"] + 1}
-        result.append(new_row)
+        result.append({"name": row["name"], "age": row["age"] + 1})
 
     return result
 
-# select a, b + 1 from X where y > 0
-def query3(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+
+# select name, age + 1 as age from users where age > 25
+def query3() -> list[dict[str, Any]]:
+    data = pq.read_table(FILE_NAME).to_pylist()
     result = []
     for row in data:
-        if row["y"] > 0:
-            new_row = {"a": row["a"], "b": row["b"] + 1}
-            result.append(new_row)
+        if row["age"] > 25:
+            result.append({"name": row["name"], "age": row["age"] + 1})
 
     return result
 
-# select sum(a) as total from X
-def query4(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+
+# select avg(age) as avg_age from users
+def query4() -> list[dict[str, Any]]:
+    count = 0
     total = 0
+    data = pq.read_table(FILE_NAME).to_pylist()
     for row in data:
-        total += row["a"]
+        count += 1
+        total += row["age"]
 
-    return [{"total": total}]
+    return [{"avg_age": total / count}]

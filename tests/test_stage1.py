@@ -1,87 +1,64 @@
-from engine.stage1_handwritten import query1, query2, query3, query4
+import pyarrow.parquet as pq
+
+from engine.stage1_handwritten import (
+    FILE_NAME,
+    query1,
+    query2,
+    query3,
+    query4,
+)
 
 
-# query1: select * from X
-def test_query1():
-    result = query1([{"a": 1}])
-    assert result == [{"a": 1}]
+def load_data():
+    return pq.read_table(FILE_NAME).to_pylist()
 
 
-def test_query1_multiple_rows():
-    data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-    assert query1(data) == data
-
-
-def test_query1_empty():
-    assert query1([]) == []
+# query1: select * from users
+def test_query1_returns_all_rows():
+    data = load_data()
+    result = query1()
+    assert result == data
 
 
 def test_query1_preserves_all_columns():
-    data = [{"a": 1, "b": 2, "c": "x", "y": -5}]
-    assert query1(data) == data
+    result = query1()
+    assert set(result[0].keys()) == {"id", "name", "age", "country"}
 
 
-# query2: select a, b + 1 from X
-def test_query2_projects_and_computes():
-    result = query2([{"a": 1, "b": 2}])
-    assert result == [{"a": 1, "b": 3}]
+# query2: select name, age + 1 as age from users
+def test_query2_projects_name_and_increments_age():
+    data = load_data()
+    result = query2()
+    expected = [{"name": row["name"], "age": row["age"] + 1} for row in data]
+    assert result == expected
 
 
 def test_query2_drops_other_columns():
-    result = query2([{"a": 1, "b": 2, "c": "keep_me_out", "y": 9}])
-    assert result == [{"a": 1, "b": 3}]
+    result = query2()
+    assert set(result[0].keys()) == {"name", "age"}
 
 
-def test_query2_multiple_rows():
-    data = [{"a": 1, "b": 0}, {"a": 5, "b": -1}]
-    assert query2(data) == [{"a": 1, "b": 1}, {"a": 5, "b": 0}]
-
-
-def test_query2_empty():
-    assert query2([]) == []
-
-
-# query3: select a, b + 1 from X where y > 0
-def test_query3_keeps_matching_and_projects():
-    result = query3([{"a": 1, "b": 2, "y": 5}])
-    assert result == [{"a": 1, "b": 3}]
-
-
-def test_query3_filters_out_non_positive_y():
-    data = [
-        {"a": 1, "b": 2, "y": -3},
-        {"a": 2, "b": 3, "y": 4},
+# query3: select name, age + 1 as age from users where age > 25
+def test_query3_filters_and_projects():
+    data = load_data()
+    expected = [
+        {"name": row["name"], "age": row["age"] + 1}
+        for row in data
+        if row["age"] > 25
     ]
-    assert query3(data) == [{"a": 2, "b": 4}]
+    result = query3()
+    assert result == expected
 
 
-def test_query3_boundary_y_zero_excluded():
-    # y > 0 is strict, so y == 0 must be filtered out
-    assert query3([{"a": 1, "b": 2, "y": 0}]) == []
+def test_query3_excludes_age_at_or_below_25():
+    result = query3()
+    # age + 1 means every surviving row had age > 25, so reported age > 26
+    assert all(row["age"] > 26 for row in result)
 
 
-def test_query3_all_filtered():
-    data = [{"a": 1, "b": 2, "y": 0}, {"a": 2, "b": 3, "y": -1}]
-    assert query3(data) == []
-
-
-def test_query3_empty():
-    assert query3([]) == []
-
-
-# query4: select sum(a) as total from X
-def test_query4_sums_rows():
-    result = query4([{"a": 1}, {"a": 2}, {"a": 3}])
-    assert result == [{"total": 6}]
-
-
-def test_query4_single_row():
-    assert query4([{"a": 7}]) == [{"total": 7}]
-
-
-def test_query4_empty_sums_to_zero():
-    assert query4([]) == [{"total": 0}]
-
-
-def test_query4_negative_values():
-    assert query4([{"a": 5}, {"a": -2}, {"a": -3}]) == [{"total": 0}]
+# query4: select avg(age) as avg_age from users
+def test_query4_computes_average_age():
+    data = load_data()
+    expected = sum(row["age"] for row in data) / len(data)
+    result = query4()
+    assert result == [{"avg_age": expected}]
