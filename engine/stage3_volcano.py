@@ -12,7 +12,6 @@ class Operator:
         raise NotImplementedError(f"close not implemented for {self}")
 
 
-# select * from users;
 class TableScan(Operator):
     def __init__(self):
         self._file = pq.ParquetFile(FILE_NAME)
@@ -28,7 +27,6 @@ class TableScan(Operator):
         self._file.close()
 
 
-# select name, age + 1 as age from users;
 class Projection(Operator):
     def __init__(self, child: Operator) -> None:
         self._child = child
@@ -40,6 +38,8 @@ class Projection(Operator):
         return {"name": maybe_row["name"], "age": maybe_row["age"] + 1}
 
 
+# select name, age + 1 as age from users;
+# projection: name, age + 1
 if __name__ == "__main__":
     plan = Projection(TableScan(FILE_NAME))
 

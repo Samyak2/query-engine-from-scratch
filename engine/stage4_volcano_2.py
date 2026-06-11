@@ -1,6 +1,8 @@
 from typing import Any
 import pyarrow.parquet as pq
 
+FILE_NAME = "data/sample_1.parquet"
+
 
 class Operator:
     def next(self) -> dict[str, Any] | None:
@@ -11,9 +13,8 @@ class Operator:
 
 
 class TableScan(Operator):
-    def __init__(self, filename: str):
-        super().__init__()
-        self._file = pq.ParquetFile(filename)
+    def __init__(self):
+        self._file = pq.ParquetFile(FILE_NAME)
         self._iter = self._file.iter_batches(1)
 
     def next(self) -> dict[str, Any] | None:
@@ -28,14 +29,13 @@ class TableScan(Operator):
 
 class Projection(Operator):
     def __init__(self, child: Operator) -> None:
-        super().__init__()
         self._child = child
 
     def next(self) -> dict[str, Any] | None:
         maybe_row = self._child.next()
         if not maybe_row:
             return None
-        return {"a": maybe_row["a"], "b": maybe_row["b"] + 1}
+        return {"name": maybe_row["name"], "age": maybe_row["age"] + 1}
 
 
 class Filter(Operator):
@@ -49,12 +49,18 @@ class Filter(Operator):
             if not maybe_row:
                 return None
 
-            if maybe_row["b"] > 900_000:
+            if maybe_row["age"] > 25:
                 return maybe_row
 
+    def close(self):
+        self._child.close()
 
+
+# select name, age + 1 as age from users where age > 25;
+# filter: age > 25 (on the raw rows, before projection)
+# projection: name, age + 1
 if __name__ == "__main__":
-    plan = Filter(Projection(TableScan("data/sample_1.parquet")))
+    plan = Projection(Filter(TableScan()))
 
     num_rows = 0
     row = plan.next()
