@@ -1,34 +1,33 @@
 import pyarrow as pa
 import pyarrow.parquet as pq
-import random
-import string
+from faker import Faker
 
 # Define the number of rows to generate
 num_rows = 10_000
 
-# Pre-define the character set for the string generation
-chars = string.ascii_letters + string.digits
+# Initialize Faker for synthetic data generation
+fake = Faker()
 
-# Generate the data using pure Python list comprehensions
-# Column A: Random integers from 0 to 1000
-a_data = [random.randint(0, 1000) for _ in range(num_rows)]
+# Static list of countries to sample from
+countries = ["Italy", "India", "Japan", "France", "Germany"]
 
-# Column B: Random integers from -1,000,000 to 1,000,000
-b_data = [random.randint(-1_000_000, 1_000_000) for _ in range(num_rows)]
-
-# Column C: 10-letter random alphanumeric strings
-c_data = [''.join(random.choices(chars, k=10)) for _ in range(num_rows)]
+# Generate the data using Faker
+id_data = list(range(1, num_rows + 1))
+name_data = [fake.name() for _ in range(num_rows)]
+age_data = [fake.random_int(min=18, max=90) for _ in range(num_rows)]
+country_data = [fake.random_element(countries) for _ in range(num_rows)]
 
 # Convert the Python lists to PyArrow arrays
 # Explicitly declaring the integer types as int32 keeps the Parquet file size optimized
-a_array = pa.array(a_data, type=pa.int32())
-b_array = pa.array(b_data, type=pa.int32())
-c_array = pa.array(c_data, type=pa.string())
+id_array = pa.array(id_data, type=pa.int32())
+name_array = pa.array(name_data, type=pa.string())
+age_array = pa.array(age_data, type=pa.int32())
+country_array = pa.array(country_data, type=pa.string())
 
 # Construct the PyArrow Table
 table = pa.Table.from_arrays(
-    [a_array, b_array, c_array],
-    names=['a', 'b', 'c']
+    [id_array, name_array, age_array, country_array],
+    names=["id", "name", "age", "country"],
 )
 
 # Write the table to a Parquet file

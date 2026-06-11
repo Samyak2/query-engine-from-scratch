@@ -12,6 +12,18 @@ wheels = [
 ]
 
 [[package]]
+name = "faker"
+version = "40.23.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tzdata", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f3/d6/fc071e5754815d9058e12ab549cc88e90f8f4ecf4dc33b6b750cdf4b622d/faker-40.23.0.tar.gz", hash = "sha256:f135e563f1f95f19346bb680bc2e43570bc43b7893e566023746f51f32c69dfc", size = 1972975, upload-time = "2026-06-10T20:53:21.611Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/64/5f/824e6fb3e9d63408151dc9173994fa65bde620a67dde3a59354f5aecd497/faker-40.23.0-py3-none-any.whl", hash = "sha256:775922453e54afa42eaf60eac478fa3a969357f224d09a8022b93e3ad88f18ae", size = 2013046, upload-time = "2026-06-10T20:53:19.226Z" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -122,6 +134,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "faker" },
     { name = "pyarrow-stubs" },
     { name = "pytest" },
     { name = "ruff" },
@@ -135,6 +148,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "faker", specifier = ">=40.23.0" },
     { name = "pyarrow-stubs", specifier = ">=20.0.0.20251215" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "ruff", specifier = ">=0.15.16" },
@@ -195,4 +209,13 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0b/9e/04a2bfaf9c5d1018432520758dcd3581d3a1ffc18b41ac24c2ee176fe7d8/sqloxide-0.61.1-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c806a2b83fe8405bc3a9520a29fb6b3d531ae014ac34c4c7bd51465f7714b039", size = 5546697, upload-time = "2026-04-06T04:18:17.618Z" },
     { url = "https://files.pythonhosted.org/packages/7a/f4/f8eacb59c45a3cf0d80711363c53516ed872d9e2f0ff96cab3eba4d73b4f/sqloxide-0.61.1-cp314-cp314t-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:bf0b9e2eb8729617137a93d29d48d94d43a084077b7aeac4f75864adcb7c0aa5", size = 6020391, upload-time = "2026-04-06T04:18:20.031Z" },
     { url = "https://files.pythonhosted.org/packages/01/46/8e7fe6a1db5736751188a7036b1057f19c182bbb885cb32b37df104355c9/sqloxide-0.61.1-cp314-cp314t-win_amd64.whl", hash = "sha256:a967d90bf209b5c92e71352e33204964728262cc8b9dbf39e8f8419a6b6ebbe2", size = 5088897, upload-time = "2026-04-06T04:18:22.449Z" },
+]
+
+[[package]]
+name = "tzdata"
+version = "2026.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/19/1b9b0e29f30c6d35cb345486df41110984ea67ae69dddbc0e8a100999493/tzdata-2026.2.tar.gz", hash = "sha256:9173fde7d80d9018e02a662e168e5a2d04f87c41ea174b139fbef642eda62d10", size = 198254, upload-time = "2026-04-24T15:22:08.651Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ce/e4/dccd7f47c4b64213ac01ef921a1337ee6e30e8c6466046018326977efd95/tzdata-2026.2-py2.py3-none-any.whl", hash = "sha256:bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7", size = 349321, upload-time = "2026-04-24T15:22:05.876Z" },
 ]
