@@ -55,6 +55,19 @@ def test_comparison_returns_boolean_column():
 # --- operators over column batches ---
 
 
+def test_tablescan_yields_column_batches():
+    raw = _raw_rows()
+    scan = TableScan(FILE_NAME)
+    try:
+        batch = scan.next()
+    finally:
+        scan.close()
+
+    assert set(batch.keys()) == {"id", "name", "age", "country"}
+    assert len({len(column) for column in batch.values()}) == 1
+    assert {name: values[0] for name, values in batch.items()} == raw[0]
+
+
 def test_sum_aggregate_folds_batches():
     child = _StubChild([{"age": [1, 2, 3]}, {"age": [4, 5]}])
     result = SumAggregate("sum", _arg_expr("age"), child).next()

@@ -34,9 +34,13 @@ def _run(sql: str):
         plan.close()
 
 
+def _scan():
+    return TableScan()
+
+
 # SumAggregate folds every row into a single total
 def test_sum_over_all_rows():
-    scan = TableScan(FILE_NAME)
+    scan = _scan()
     plan = SumAggregate("sum", _arg_expr("age"), scan)
     try:
         first = plan.next()
@@ -47,7 +51,7 @@ def test_sum_over_all_rows():
 
 # It's a blocking operator: exactly one output row, then None
 def test_sum_emits_single_row_then_none():
-    scan = TableScan(FILE_NAME)
+    scan = _scan()
     plan = SumAggregate("sum", _arg_expr("age"), scan)
     try:
         assert plan.next() is not None
@@ -59,7 +63,7 @@ def test_sum_emits_single_row_then_none():
 
 # The inner expression is evaluated per row before summing
 def test_sum_of_expression():
-    scan = TableScan(FILE_NAME)
+    scan = _scan()
     plan = SumAggregate("total", _arg_expr("age + 1"), scan)
     try:
         result = plan.next()
@@ -73,7 +77,7 @@ def test_sum_over_filter():
     predicate = parse_sql("select * from users where age > 35", dialect="ansi")[0][
         "Query"
     ]["body"]["Select"]["selection"]
-    scan = TableScan(FILE_NAME)
+    scan = _scan()
     plan = SumAggregate("sum", _arg_expr("age"), Filter(predicate, scan))
     try:
         result = plan.next()

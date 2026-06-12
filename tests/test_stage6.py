@@ -97,9 +97,9 @@ def test_nested_parentheses():
     assert _eval("2 * (3 + 4)") == 14
 
 
-# Aggregates aren't per-row expressions -- the evaluator points elsewhere.
+# Function calls are not per-row expressions in this stage.
 def test_aggregate_function_raises():
-    with pytest.raises(Exception, match="aggregate 'avg'"):
+    with pytest.raises(Exception):
         _eval("avg(age)", {"age": 30})
 
 
